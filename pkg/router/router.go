@@ -24,6 +24,10 @@ const (
 	defaultIdleTimeout  = 10 * time.Second
 )
 
+type Handler interface {
+	RegisterRoutes(*fiber.App)
+}
+
 type router struct {
 	Config
 	app    *fiber.App
