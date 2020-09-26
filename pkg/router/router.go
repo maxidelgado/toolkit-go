@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
-	"github.com/gofiber/helmet"
+	"github.com/gofiber/helmet/v2"
 	"github.com/maxidelgado/toolkit-go/pkg/ctxhelper"
 	"github.com/maxidelgado/toolkit-go/pkg/logger"
 	"go.uber.org/zap"
