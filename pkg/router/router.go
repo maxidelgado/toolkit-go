@@ -7,11 +7,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet"
 	"github.com/maxidelgado/toolkit-go/pkg/ctxhelper"
 	"github.com/maxidelgado/toolkit-go/pkg/logger"
-	"github.com/maxidelgado/toolkit-go/pkg/router/middleware/auth0"
 	"go.uber.org/zap"
 )
 
@@ -40,6 +40,7 @@ func New(config Config) *router {
 	}
 
 	app.Use(
+		recover.New(),
 		requestid.New(),
 		setupContext,
 		logRequest,
