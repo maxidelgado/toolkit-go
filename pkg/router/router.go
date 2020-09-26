@@ -87,7 +87,7 @@ func getConfig(config Config) fiber.Config {
 	}
 }
 
-func setupContext(c *fiber.Ctx) {
+func setupContext(c *fiber.Ctx) error {
 	rid := c.Response().Header.Peek(fiber.HeaderXRequestID)
 	uid := c.Get(UserIdHeader)
 	apiKey := c.Get(ApiKeyHeader)
@@ -98,22 +98,22 @@ func setupContext(c *fiber.Ctx) {
 	ch.SetRequestId(string(rid))
 
 	c.Locals(ctxhelper.Key, ch)
-	c.Next()
+	return c.Next()
 }
 
-func logRequest(c *fiber.Ctx) {
+func logRequest(c *fiber.Ctx) error {
 	log := logger.WithContext(c.Context())
 	log.Info(
 		"request",
 		zap.String("method", c.Method()),
 		zap.String("path", c.Path()),
 	)
-	c.Next()
+	return c.Next()
 }
 
-func logResponse(c *fiber.Ctx) {
+func logResponse(c *fiber.Ctx) error {
 	start := time.Now()
-	c.Next()
+	err := c.Next()
 	duration := time.Since(start)
 	log := logger.WithContext(c.Context())
 	log.Info("response",
@@ -121,6 +121,7 @@ func logResponse(c *fiber.Ctx) {
 		zap.Int("status", c.Response().StatusCode()),
 		zap.String("body", string(c.Response().Body())),
 	)
+	return err
 }
 
 func defaultErrorHandler(ctx *fiber.Ctx, err error) error {
