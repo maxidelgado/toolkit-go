@@ -61,6 +61,12 @@ func (r *router) Engine() *fiber.App {
 	return r.app
 }
 
+func (r *router) RegisterHandlers(handlers ...Handler) {
+	for _, handler := range handlers {
+		handler.RegisterRoutes(r.app)
+	}
+}
+
 func getConfig(config Config) fiber.Config {
 	readTimeout := defaultReadTimeout
 	writeTimeout := defaultWriteTimeout
