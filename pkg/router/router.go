@@ -133,11 +133,8 @@ func defaultErrorHandler(ctx *fiber.Ctx, err error) error {
 }
 
 type Config struct {
-	Host       string        `yaml:"host"`
-	Port       string        `yaml:"port"`
-	UseAdapter bool          `yaml:"useAdapter"`
-	Timeout    Timeout       `yaml:"timeout"`
-	Logging    logger.Config `yaml:"logging"`
+	Timeout Timeout       `yaml:"timeout"`
+	Logging logger.Config `yaml:"logging"`
 }
 
 type Timeout struct {

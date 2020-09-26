@@ -1,5 +1,5 @@
 #!make
-export version=v0.0.0-wip6
+export version=v0.0.0-wip7
 
 version:
 	git tag ${version}
