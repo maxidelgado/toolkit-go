@@ -25,7 +25,7 @@ const (
 )
 
 type Handler interface {
-	RegisterRoutes(*fiber.App)
+	RegisterRoutes(app *fiber.App)
 }
 
 type router struct {
