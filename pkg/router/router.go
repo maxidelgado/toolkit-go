@@ -130,7 +130,7 @@ func defaultErrorHandler(ctx *fiber.Ctx, err error) error {
 		code = e.Code
 	}
 	ctx.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
-	return ctx.Status(code).JSON(err.Error())
+	return ctx.Status(code).JSON(err)
 }
 
 type Config struct {
