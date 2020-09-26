@@ -1,4 +1,4 @@
-module github/maxidelgado/toolkit-go
+module github.com/maxidelgado/toolkit-go
 
 go 1.14
 

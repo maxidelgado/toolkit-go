@@ -8,8 +8,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber"
-	"github/maxidelgado/toolkit-go/pkg/ctxhelper"
-	"github/maxidelgado/toolkit-go/pkg/logger"
+	"github.com/maxidelgado/toolkit-go/pkg/ctxhelper"
+	"github.com/maxidelgado/toolkit-go/pkg/logger"
 	"go.uber.org/zap"
 )
 

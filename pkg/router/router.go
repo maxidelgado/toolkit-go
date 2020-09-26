@@ -8,9 +8,9 @@ import (
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/fiber/middleware"
 	"github.com/gofiber/helmet"
-	"github/maxidelgado/toolkit-go/pkg/ctxhelper"
-	"github/maxidelgado/toolkit-go/pkg/logger"
-	"github/maxidelgado/toolkit-go/pkg/router/middleware/auth0"
+	"github.com/maxidelgado/toolkit-go/pkg/ctxhelper"
+	"github.com/maxidelgado/toolkit-go/pkg/logger"
+	"github.com/maxidelgado/toolkit-go/pkg/router/middleware/auth0"
 	"go.uber.org/zap"
 )
 

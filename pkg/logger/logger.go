@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github/maxidelgado/toolkit-go/pkg/ctxhelper"
+	"github.com/maxidelgado/toolkit-go/pkg/ctxhelper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
