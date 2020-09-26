@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gofiber/cors"
-	"github.com/gofiber/fiber"
-	"github.com/gofiber/fiber/middleware"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet"
 	"github.com/maxidelgado/toolkit-go/pkg/ctxhelper"
 	"github.com/maxidelgado/toolkit-go/pkg/logger"
@@ -30,9 +31,7 @@ type router struct {
 }
 
 func New(config Config) *router {
-	app := fiber.New(&fiber.Settings{
-		ErrorHandler: defaultErrorHandler,
-	})
+	app := fiber.New(getConfig(config))
 
 	r := &router{
 		Config: config,
@@ -40,43 +39,15 @@ func New(config Config) *router {
 		logger: logger.Logger(&config.Logging),
 	}
 
-	// App config
-	app.Settings.ReadTimeout = defaultReadTimeout
-	app.Settings.WriteTimeout = defaultWriteTimeout
-	app.Settings.IdleTimeout = defaultIdleTimeout
-
-	if config.Timeout.Read != 0 {
-		app.Settings.ReadTimeout = time.Duration(config.Timeout.Read) * time.Second
-	}
-
-	if config.Timeout.Write != 0 {
-		app.Settings.WriteTimeout = time.Duration(config.Timeout.Write) * time.Second
-	}
-
-	if config.Timeout.Idle != 0 {
-		app.Settings.IdleTimeout = time.Duration(config.Timeout.Idle) * time.Second
-	}
-
-	// Show Fiber logo on console for debug mode
-	if config.Logging.Level != "debug" {
-		app.Settings.DisableStartupMessage = true
-	}
-
 	app.Use(
-		middleware.RequestID(),
+		requestid.New(),
 		setupContext,
 		logRequest,
 		logResponse,
-		middleware.Compress(),
+		compress.New(),
 		helmet.New(),
 		cors.New(),
 	)
-	// Add default middleware
-
-	// Add opt middleware
-	if config.Protected {
-		app.Use(auth0.Protected(config.Authorization))
-	}
 
 	return r
 }
@@ -85,13 +56,34 @@ func (r *router) Engine() *fiber.App {
 	return r.app
 }
 
-func (r *router) ValidateJWT(config auth0.Config) *router {
-	r.app.Use(auth0.Protected(config))
-	return r
+func getConfig(config Config) fiber.Config {
+	readTimeout := defaultReadTimeout
+	writeTimeout := defaultWriteTimeout
+	idleTimeout := defaultIdleTimeout
+	disableStartupMsg := false
+
+	switch {
+	case config.Timeout.Read != 0:
+		readTimeout = time.Duration(config.Timeout.Read) * time.Second
+	case config.Timeout.Write != 0:
+		writeTimeout = time.Duration(config.Timeout.Write) * time.Second
+	case config.Timeout.Idle != 0:
+		idleTimeout = time.Duration(config.Timeout.Idle) * time.Second
+	case config.Logging.Level != "debug":
+		disableStartupMsg = true
+	}
+
+	return fiber.Config{
+		ErrorHandler:          defaultErrorHandler,
+		ReadTimeout:           readTimeout,
+		WriteTimeout:          writeTimeout,
+		IdleTimeout:           idleTimeout,
+		DisableStartupMessage: disableStartupMsg,
+	}
 }
 
 func setupContext(c *fiber.Ctx) {
-	rid := c.Fasthttp.Response.Header.Peek(fiber.HeaderXRequestID)
+	rid := c.Response().Header.Peek(fiber.HeaderXRequestID)
 	uid := c.Get(UserIdHeader)
 	apiKey := c.Get(ApiKeyHeader)
 
@@ -121,28 +113,26 @@ func logResponse(c *fiber.Ctx) {
 	log := logger.WithContext(c.Context())
 	log.Info("response",
 		zap.Int64("rt", duration.Milliseconds()),
-		zap.Int("status", c.Fasthttp.Response.StatusCode()),
-		zap.String("body", string(c.Fasthttp.Response.Body())),
+		zap.Int("status", c.Response().StatusCode()),
+		zap.String("body", string(c.Response().Body())),
 	)
 }
 
-func defaultErrorHandler(ctx *fiber.Ctx, err error) {
+func defaultErrorHandler(ctx *fiber.Ctx, err error) error {
 	code := http.StatusInternalServerError
 	if e, ok := err.(*fiber.Error); ok {
 		code = e.Code
 	}
 	ctx.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
-	ctx.Status(code).SendString(err.Error())
+	return ctx.Status(code).SendString(err.Error())
 }
 
 type Config struct {
-	Host          string        `yaml:"host"`
-	Port          string        `yaml:"port"`
-	UseAdapter    bool          `yaml:"useAdapter"`
-	Protected     bool          `yaml:"protected"`
-	Timeout       Timeout       `yaml:"timeout"`
-	Logging       logger.Config `yaml:"logging"`
-	Authorization auth0.Config  `yaml:"authorization"`
+	Host       string        `yaml:"host"`
+	Port       string        `yaml:"port"`
+	UseAdapter bool          `yaml:"useAdapter"`
+	Timeout    Timeout       `yaml:"timeout"`
+	Logging    logger.Config `yaml:"logging"`
 }
 
 type Timeout struct {
