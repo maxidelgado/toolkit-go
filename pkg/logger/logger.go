@@ -21,6 +21,11 @@ type Config struct {
 
 func Logger(config ...*Config) *zap.Logger {
 	logOnce.Do(func() {
+		if len(config) == 0 {
+			log = buildLogger(&Config{})
+			return
+		}
+
 		log = buildLogger(config[0])
 	})
 
